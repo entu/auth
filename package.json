@@ -19,7 +19,7 @@
         "node": "6.0.x"
     },
     "dependencies": {
-        "async": "1.x",
+        "async": "2.x",
         "body-parser": "1.x",
         "cluster": "0.x",
         "cookie-parser": "1.x",
@@ -34,8 +34,9 @@
         "passport-windowslive": "1.x",
         "passport": "0.x",
         "randomstring": "1.x",
-        "raven": "0.x",
+        "raven": "1.x",
         "request": "2.x",
+        "soap": "0.x",
         "underscore": "1.x"
     }
 }
