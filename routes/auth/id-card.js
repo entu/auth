@@ -9,6 +9,17 @@ var entu   = require('../../helpers/entu')
 
 
 router.get('/', function(req, res) {
+    res.clearCookie('redirect')
+    res.clearCookie('session', {
+        domain: APP_COOKIE_DOMAIN
+    })
+
+    if(req.query.next) {
+        res.cookie('redirect', req.query.next, {
+            maxAge: 60 * 60 * 1000
+        })
+    }
+
     res.redirect('https://id.auth.entu.ee/auth/id-card/callback')
 })
 
