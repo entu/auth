@@ -18,15 +18,13 @@ var dbConnection = function(db, callback) {
             }
         },
     ], function(err) {
-        if(!err) { callback(null, APP_ENTU_DBS[db]) }
+        if(!err) { return callback(null, APP_ENTU_DBS[db]) }
 
         mongo.MongoClient.connect(APP_MONGODB + db, { server: { autoReconnect: true } }, function(err, connection) {
-            if(err) {
-                callback(err)
-            } else {
-                APP_ENTU_DBS[db] = connection
-                callback(null, APP_ENTU_DBS[db])
-            }
+            if(err) { return callback(err) }
+
+            APP_ENTU_DBS[db] = connection
+            callback(null, APP_ENTU_DBS[db])
         })
     })
 }

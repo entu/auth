@@ -111,12 +111,8 @@ if(process.env.SENTRY_DSN) {
 }
 
 // show 404
-app.use(function(req, res) {
-    res.status(404).send({
-        error: 'Not found',
-        version: APP_VERSION,
-        started: APP_STARTED
-    })
+app.use(function(req, res, next) {
+    next([404, new Error('not found')])
 })
 
 // show error
@@ -128,7 +124,7 @@ app.use(function(err, req, res, next) {
         error = err[1]
     }
     res.status(code).send({
-        error: error,
+        error: error.toString(),
         version: APP_VERSION,
         started: APP_STARTED
     })
