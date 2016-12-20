@@ -9,7 +9,7 @@ var entu   = require('../../helpers/entu')
 
 
 router.get('/', function(req, res) {
-    res.redirect('https://id.entu.ee/auth/id-card/callback')
+    res.redirect('https://id.auth.entu.ee/auth/id-card/callback')
 })
 
 
