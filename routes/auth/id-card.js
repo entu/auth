@@ -25,6 +25,22 @@ router.get('/', function(req, res) {
 
 
 
+router.get('/error', function(req, res) {
+    var redirectUrl = req.cookies.redirect
+    if(redirectUrl) {
+        res.clearCookie('redirect')
+        res.redirect(redirectUrl)
+    } else {
+        res.send({
+            error: 'No required SSL certificate was sent',
+            version: APP_VERSION,
+            started: APP_STARTED
+        })
+    }
+})
+
+
+
 router.get('/callback', function(req, res, next) {
     async.waterfall([
         function (callback) {
