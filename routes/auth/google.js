@@ -24,7 +24,9 @@ passport.use(new google({
 
 
 router.get('/', function(req, res) {
-    res.clearCookie('redirect')
+    res.clearCookie('redirect', {
+        domain: APP_COOKIE_DOMAIN
+    })
     res.clearCookie('session', {
         domain: APP_COOKIE_DOMAIN
     })
@@ -74,7 +76,9 @@ router.get('/callback', passport.authenticate('google', { failureRedirect: '/log
                 maxAge: 14 * 24 * 60 * 60 * 1000,
                 domain: APP_COOKIE_DOMAIN
             })
-            res.clearCookie('redirect')
+            res.clearCookie('redirect', {
+                domain: APP_COOKIE_DOMAIN
+            })
             res.redirect(redirectUrl)
         } else {
             res.send({

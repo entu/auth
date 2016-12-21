@@ -9,7 +9,9 @@ var entu   = require('../../helpers/entu')
 
 
 router.get('/', function(req, res) {
-    res.clearCookie('redirect')
+    res.clearCookie('redirect', {
+        domain: APP_COOKIE_DOMAIN
+    })
     res.clearCookie('session', {
         domain: APP_COOKIE_DOMAIN
     })
@@ -29,7 +31,9 @@ router.get('/', function(req, res) {
 router.get('/error', function(req, res) {
     var redirectUrl = req.cookies.redirect
     if(redirectUrl) {
-        res.clearCookie('redirect')
+        res.clearCookie('redirect', {
+            domain: APP_COOKIE_DOMAIN
+        })
         res.redirect(redirectUrl)
     } else {
         res.send({
@@ -87,7 +91,9 @@ router.get('/callback', function(req, res, next) {
                 maxAge: 14 * 24 * 60 * 60 * 1000,
                 domain: APP_COOKIE_DOMAIN
             })
-            res.clearCookie('redirect')
+            res.clearCookie('redirect', {
+                domain: APP_COOKIE_DOMAIN
+            })
             res.redirect(redirectUrl)
         } else {
             res.send({
