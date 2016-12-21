@@ -31,7 +31,8 @@ router.get('/', function(req, res) {
 
     if(req.query.next) {
         res.cookie('redirect', req.query.next, {
-            maxAge: 60 * 60 * 1000
+            maxAge: 60 * 60 * 1000,
+            domain: APP_COOKIE_DOMAIN
         })
     }
 
