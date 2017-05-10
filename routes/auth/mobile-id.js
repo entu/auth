@@ -10,6 +10,20 @@ var entu   = require('../../helpers/entu')
 
 
 router.post('/', function(req, res, next) {
+    res.clearCookie('redirect', {
+        domain: APP_COOKIE_DOMAIN
+    })
+    res.clearCookie('session', {
+        domain: APP_COOKIE_DOMAIN
+    })
+
+    if(req.query.next) {
+        res.cookie('redirect', req.body.next, {
+            maxAge: 60 * 60 * 1000,
+            domain: APP_COOKIE_DOMAIN
+        })
+    }
+
     const spChallenge = random.generate({ length: 20, charset: 'hex', capitalization: 'uppercase' })
     var challengeID
 
@@ -71,6 +85,7 @@ router.post('/', function(req, res, next) {
                 code: op.get(session, ['ChallengeID', '$value']),
                 idcode: req.body.idcode,
                 phone: req.body.phone,
+                redirect: req.body.next,
                 user: user
             }, callback)
         },
@@ -138,6 +153,8 @@ router.get('/:key', function(req, res, next) {
 
         var redirectUrl = req.cookies.redirect
         if(redirectUrl) {
+            session.redirect = redirectUrl
+
             res.cookie('session', session.key, {
                 maxAge: 14 * 24 * 60 * 60 * 1000,
                 domain: APP_COOKIE_DOMAIN
@@ -145,14 +162,13 @@ router.get('/:key', function(req, res, next) {
             res.clearCookie('redirect', {
                 domain: APP_COOKIE_DOMAIN
             })
-            res.redirect(redirectUrl)
-        } else {
-            res.send({
-                result: session,
-                version: APP_VERSION,
-                started: APP_STARTED
-            })
         }
+
+        res.send({
+            result: session,
+            version: APP_VERSION,
+            started: APP_STARTED
+        })
     })
 })
 
