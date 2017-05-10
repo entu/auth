@@ -188,8 +188,8 @@ exports.setMobileIdSession = function(session, callback) {
             }, callback)
         },
     ], function(err, session) {
-        if(err) { return next(err) }
-        if(!session || !session._id) { return next([403, 'No session']) }
+        if(err) { return callback(err) }
+        if(!session || !session._id) { return callback([403, 'No session']) }
 
         callback(null, session)
     })
@@ -202,10 +202,10 @@ exports.getMobileIdSession = function(key, callback) {
     try {
         const session_id = new mongo.ObjectID(key)
     } catch (e) {
-        return next(null)
+        return callback(null)
     }
 
-    if(!session_id) { return next(null) }
+    if(!session_id) { return callback(null) }
 
     async.waterfall([
         function(callback) {
@@ -215,8 +215,8 @@ exports.getMobileIdSession = function(key, callback) {
             connection.collection('midSessions').findOne({ _id: session_id }, callback)
         },
     ], function(err, session) {
-        if(err) { return next(err) }
-        if(!session || !session._id) { return next([403, 'No session']) }
+        if(err) { return callback(err) }
+        if(!session || !session._id) { return callback([403, 'No session']) }
 
         callback(null, session)
     })
