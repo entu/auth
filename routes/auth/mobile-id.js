@@ -22,8 +22,9 @@ router.post('/', function(req, res, next) {
                 PhoneNo: req.body.phone,
                 ServiceName: MOBILE_ID,
                 MessagingMode: 'asynchClientServer',
-                // Language:
-                // MessageToDisplay:
+                Language: 'EST',
+                // MessageToDisplay: '',
+                // SPChallenge: '',
             }
 
             client.MobileAuthenticate(parameters, function(err, result) {
