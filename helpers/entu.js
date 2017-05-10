@@ -187,11 +187,11 @@ exports.setMobileIdSession = function(session, callback) {
                 user: session.user
             }, callback)
         },
-    ], function(err, session) {
+    ], function(err, r) {
         if(err) { return callback(err) }
-        if(!session || !session._id) { return callback([403, 'No session']) }
+        if(!r) { return callback(r) }
 
-        callback(null, session)
+        callback(null, r.insertedId)
     })
 }
 
@@ -200,7 +200,7 @@ exports.setMobileIdSession = function(session, callback) {
 // Get mobile-id session
 exports.getMobileIdSession = function(key, callback) {
     try {
-        const session_id = new mongo.ObjectID(key)
+        var session_id = new mongo.ObjectID(key)
     } catch (e) {
         return callback(null)
     }

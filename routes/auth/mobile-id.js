@@ -70,13 +70,13 @@ router.post('/', function(req, res, next) {
                 phone: req.body.phone,
                 user: user
             }, callback)
-        }
+        },
     ], function (err, result) {
         if(err) { return next(err) }
 
         res.send({
             result: {
-                key: result._id,
+                key: result
             },
             version: APP_VERSION,
             started: APP_STARTED
@@ -129,7 +129,7 @@ router.get('/:key', function(req, res, next) {
             // }
 
             entu.sessionStart({ request: req, response: res, user: op.get(midSession, 'user', {}) }, callback)
-        }
+        },
     ], function (err, session) {
         if(err) { return next(err) }
 
