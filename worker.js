@@ -17,6 +17,8 @@ APP_PORT           = process.env.PORT || 3000
 APP_COOKIE_DOMAIN  = process.env.COOKIE_DOMAIN || ''
 APP_MONGODB        = process.env.MONGODB || 'mongodb://entu_mongodb:27017/'
 
+MOBILE_ID = process.env.MOBILE_ID
+
 GOOGLE_ID = process.env.GOOGLE_ID
 GOOGLE_SECRET = process.env.GOOGLE_SECRET
 
@@ -99,6 +101,7 @@ app.use('/user', require('./routes/user'))
 // provider mapping (only if configured)
 app.use('/auth/id-card', require('./routes/auth/id-card'))
 
+if(MOBILE_ID) { app.use('/auth/mobile-id', require('./routes/auth/mobile-id')) }
 if(GOOGLE_ID && GOOGLE_SECRET) { app.use('/auth/google', require('./routes/auth/google')) }
 if(FACEBOOK_ID && FACEBOOK_SECRET) { app.use('/auth/facebook', require('./routes/auth/facebook')) }
 if(TWITTER_KEY && TWITTER_SECRET) { app.use('/auth/twitter', require('./routes/auth/twitter')) }
