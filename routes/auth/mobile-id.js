@@ -41,17 +41,17 @@ router.post('/', function(req, res, next) {
             }, callback)
         },
         function (session, callback) {
-            if (!op(session, 'Sesscode.$value')) {
+            if (!op.get(session, 'Sesscode.$value')) {
                 return callback(new Error('No MobileAuthenticate session'))
             }
 
             if (op(session, 'Challenge.$value') !== spChallenge) {
-                console.log(op(session, 'Challenge.$value'))
+                console.log(op.get(session, 'Challenge.$value'))
                 // return callback(new Error('Challenge mismatch'))
             }
 
             soapClient.GetMobileAuthenticateStatus({
-                Sesscode: op(session, 'Sesscode.$value'),
+                Sesscode: op.get(session, 'Sesscode.$value'),
                 WaitSignature: true,
             }, callback)
         },
