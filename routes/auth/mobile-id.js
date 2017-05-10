@@ -10,7 +10,7 @@ var entu   = require('../../helpers/entu')
 
 
 router.post('/', function(req, res, next) {
-    const spChallenge = random.generate({ length: 20, charset: 'hex' })
+    const spChallenge = random.generate({ length: 20, charset: 'hex', capitalization: 'uppercase' })
     var soapClient
 
     console.log(spChallenge)
@@ -41,26 +41,47 @@ router.post('/', function(req, res, next) {
             }, callback)
         },
         function (session, callback) {
-            if (!op.get(session, 'Sesscode.$value')) {
+            if (!op.get(session, ['Sesscode', '$value'])) {
                 return callback(new Error('No MobileAuthenticate session'))
             }
 
-            if (op(session, 'Challenge.$value') !== spChallenge) {
+            if (op.get(session, ['Challenge', '$value']) !== spChallenge) {
                 console.log(op.get(session, 'Challenge.$value'))
                 // return callback(new Error('Challenge mismatch'))
             }
 
-            soapClient.GetMobileAuthenticateStatus({
-                Sesscode: op.get(session, 'Sesscode.$value'),
-                WaitSignature: true,
+            var user = {}
+            var name = _.compact([
+                op.get(session, ['UserGivenname', '$value']),
+                op.get(session, ['UserSurname', '$value'])
+            ]).join(' ')
+
+            op.set(user, 'provider', 'mobile-id')
+            op.set(user, 'id', op.get(session, ['UserIDCode', '$value']))
+            op.set(user, 'name', name)
+            op.set(user, 'email', op.get(session, ['UserIDCode', '$value']) + '@eesti.ee')
+
+            entu.setMobileIdSession({
+                id: op(session, ['Sesscode', '$value']),
+                code: op(session, ['Challenge', '$value']),
+                idcode: req.body.idcode,
+                phone: req.body.phone,
+                user: user
             }, callback)
+
+            // soapClient.GetMobileAuthenticateStatus({
+            //     Sesscode: op.get(session, 'Sesscode.$value'),
+            //     WaitSignature: false,
+            // }, callback)
         },
     ], function (err, result) {
         if(err) { return next(err) }
 
-        console.log(JSON.stringify(result, false, '  '))
-
-        res.send({})
+        res.send({
+            result: result,
+            version: APP_VERSION,
+            started: APP_STARTED
+        })
     })
 })
 

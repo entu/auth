@@ -171,3 +171,30 @@ exports.sessionEnd = function(sessionKey, callback) {
         callback(null, {})
     })
 }
+
+
+
+// Save mobile-id session
+exports.setMobileIdSession = function(session, callback) {
+    const sess = {
+        dt: new Date(),
+        id: session.id,
+        code: session.code,
+        idcode: session.idcode,
+        phone: session.phone,
+        user: session.user
+    }
+
+    async.waterfall([
+        function(callback) {
+            dbConnection('entu', callback)
+        },
+        function(connection, callback) {
+            connection.collection('request').insertOne(sess, callback)
+        },
+    ], function(err) {
+        if(err) { return callback(err) }
+
+        callback(null, sess)
+    })
+}
