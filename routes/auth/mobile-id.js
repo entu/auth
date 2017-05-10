@@ -49,6 +49,10 @@ router.post('/', function(req, res, next) {
                 return callback(new Error('No MobileAuthenticate session'))
             }
 
+            if (op(session, 'Challenge.$value') !== spChallenge) {
+                return callback(new Error('Challenge mismatch'))
+            }
+
             var parameters = {
                 Sesscode: op(session, 'Sesscode.$value'),
                 WaitSignature: true,
