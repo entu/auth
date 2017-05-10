@@ -1,10 +1,14 @@
 var async  = require('async')
+var op     = require('object-path')
+var random = require('randomstring')
 var router = require('express').Router()
 var soap   = require('soap')
 
 
 
 router.post('/', function(req, res, next) {
+    const spChallenge = random.generate(20)
+
     async.waterfall([
         function (callback) {
             if (req.body.idcode) {
@@ -19,15 +23,35 @@ router.post('/', function(req, res, next) {
         function (client, callback) {
             var parameters = {
                 IDCode: req.body.idcode,
+                CountryCode: 'EE',
                 PhoneNo: req.body.phone,
                 ServiceName: MOBILE_ID,
                 MessagingMode: 'asynchClientServer',
                 Language: 'EST',
                 // MessageToDisplay: '',
-                // SPChallenge: '',
+                SPChallenge: spChallenge,
             }
 
             client.MobileAuthenticate(parameters, function(err, result) {
+                if(err) { return callback(err) }
+
+                console.log(JSON.stringify(err, false, '  '))
+                console.log(JSON.stringify(result, false, '  '))
+
+                callback(null, result)
+            })
+        },
+        function (session, callback) {
+            if (!op(session, 'Sesscode.$value')) {
+                return callback(new Error('No MobileAuthenticate session'))
+            }
+
+            var parameters = {
+                Sesscode: op(session, 'Sesscode.$value'),
+                WaitSignature: true,
+            }
+
+            client.GetMobileAuthenticateStatus(parameters, function(err, result) {
                 if(err) { return callback(err) }
 
                 console.log(JSON.stringify(err, false, '  '))
