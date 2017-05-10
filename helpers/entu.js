@@ -190,7 +190,7 @@ exports.setMobileIdSession = function(session, callback) {
             dbConnection('entu', callback)
         },
         function(connection, callback) {
-            connection.collection('request').insertOne(sess, callback)
+            connection.collection('midSessions').insertOne(sess, callback)
         },
     ], function(err) {
         if(err) { return callback(err) }
