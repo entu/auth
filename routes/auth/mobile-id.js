@@ -8,6 +8,7 @@ var soap   = require('soap')
 
 router.post('/', function(req, res, next) {
     const spChallenge = random.generate({ length: 20, charset: 'hex' })
+    var soapClient
 
     async.waterfall([
         function (callback) {
@@ -21,6 +22,8 @@ router.post('/', function(req, res, next) {
             soap.createClient('https://digidocservice.sk.ee/?wsdl', {}, callback)
         },
         function (client, callback) {
+            soapClient = client
+
             var parameters = {
                 IDCode: req.body.idcode,
                 CountryCode: 'EE',
@@ -32,7 +35,7 @@ router.post('/', function(req, res, next) {
                 SPChallenge: spChallenge,
             }
 
-            client.MobileAuthenticate(parameters, function(err, result) {
+            soapClient.MobileAuthenticate(parameters, function(err, result) {
                 if(err) { return callback(err) }
 
                 console.log(JSON.stringify(err, false, '  '))
@@ -51,7 +54,7 @@ router.post('/', function(req, res, next) {
                 WaitSignature: true,
             }
 
-            client.GetMobileAuthenticateStatus(parameters, function(err, result) {
+            soapClient.GetMobileAuthenticateStatus(parameters, function(err, result) {
                 if(err) { return callback(err) }
 
                 console.log(JSON.stringify(err, false, '  '))
