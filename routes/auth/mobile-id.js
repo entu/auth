@@ -29,7 +29,7 @@ router.post('/', function(req, res, next) {
         function (client, callback) {
             soapClient = client
 
-            var parameters = {
+            soapClient.MobileAuthenticate({
                 IDCode: req.body.idcode,
                 CountryCode: 'EE',
                 PhoneNo: req.body.phone,
@@ -38,13 +38,9 @@ router.post('/', function(req, res, next) {
                 Language: 'EST',
                 // MessageToDisplay: '',
                 SPChallenge: spChallenge,
-            }
-
-            soapClient.MobileAuthenticate(parameters, callback)
+            }, callback)
         },
         function (session, callback) {
-            console.log(JSON.stringify(result, false, '  '))
-
             if (!op(session, 'Sesscode.$value')) {
                 return callback(new Error('No MobileAuthenticate session'))
             }
@@ -54,15 +50,15 @@ router.post('/', function(req, res, next) {
                 // return callback(new Error('Challenge mismatch'))
             }
 
-            var parameters = {
+            soapClient.GetMobileAuthenticateStatus({
                 Sesscode: op(session, 'Sesscode.$value'),
                 WaitSignature: true,
-            }
-
-            soapClient.GetMobileAuthenticateStatus(parameters, callback)
+            }, callback)
         },
     ], function (err, result) {
         if(err) { return next(err) }
+
+        console.log(JSON.stringify(result, false, '  '))
 
         res.send({})
     })
