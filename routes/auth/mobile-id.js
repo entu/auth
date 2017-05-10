@@ -61,8 +61,8 @@ router.post('/', function(req, res, next) {
             op.set(user, 'email', op.get(session, ['UserIDCode', '$value']) + '@eesti.ee')
 
             entu.setMobileIdSession({
-                id: op(session, ['Sesscode', '$value']),
-                code: op(session, ['Challenge', '$value']),
+                id: op.get(session, ['Sesscode', '$value']),
+                code: op.get(session, ['Challenge', '$value']),
                 idcode: req.body.idcode,
                 phone: req.body.phone,
                 user: user
