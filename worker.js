@@ -92,6 +92,13 @@ app.use(bparser.urlencoded({extended: true}))
 app.use(entu.requestLog)
 app.use(entu.getUserSession)
 
+//CORS
+app.use(function(req, res, next) {
+    res.header('Access-Control-Allow-Origin', '*')
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
+    next()
+})
+
 // routes mapping
 app.use('/', require('./routes/index'))
 app.use('/auth/exit', require('./routes/auth/exit'))
