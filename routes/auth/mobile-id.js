@@ -13,8 +13,6 @@ router.post('/', function(req, res, next) {
     const spChallenge = random.generate({ length: 20, charset: 'hex', capitalization: 'uppercase' })
     var soapClient
 
-    console.log(spChallenge)
-
     async.waterfall([
         function (callback) {
             if (req.body.idcode) {
@@ -41,6 +39,10 @@ router.post('/', function(req, res, next) {
             }, callback)
         },
         function (session, callback) {
+            if (op.get(session, ['Status', '$value']) !== 'OK') {
+                return callback(new Error('MobileAuthenticate status not OK'))
+            }
+
             if (!op.get(session, ['Sesscode', '$value'])) {
                 return callback(new Error('No MobileAuthenticate session'))
             }
@@ -62,7 +64,7 @@ router.post('/', function(req, res, next) {
 
             entu.setMobileIdSession({
                 id: op.get(session, ['Sesscode', '$value']),
-                code: op.get(session, ['Challenge', '$value']),
+                code: op.get(session, ['ChallengeID', '$value']),
                 idcode: req.body.idcode,
                 phone: req.body.phone,
                 user: user
