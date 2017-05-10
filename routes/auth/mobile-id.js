@@ -11,6 +11,7 @@ var entu   = require('../../helpers/entu')
 
 router.post('/', function(req, res, next) {
     const spChallenge = random.generate({ length: 20, charset: 'hex', capitalization: 'uppercase' })
+    var challengeID
 
     async.waterfall([
         function (callback) {
@@ -52,6 +53,8 @@ router.post('/', function(req, res, next) {
                 return callback(new Error('Challenge mismatch'))
             }
 
+            challengeID = op.get(session, ['ChallengeID', '$value'])
+
             var user = {}
             var name = _.compact([
                 op.get(session, ['UserGivenname', '$value']),
@@ -76,7 +79,8 @@ router.post('/', function(req, res, next) {
 
         res.send({
             result: {
-                key: result
+                key: result,
+                code: challengeID
             },
             version: APP_VERSION,
             started: APP_STARTED
