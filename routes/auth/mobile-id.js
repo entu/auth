@@ -1,8 +1,11 @@
+var _      = require('underscore')
 var async  = require('async')
 var op     = require('object-path')
 var random = require('randomstring')
 var router = require('express').Router()
 var soap   = require('soap')
+
+var entu   = require('../../helpers/entu')
 
 
 
