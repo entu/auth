@@ -70,8 +70,6 @@ exports.requestLog = function(req, res, next) {
 
 // Create requestlog entry on response finish
 exports.getUserSession = function(req, res, next) {
-    var start = Date.now()
-
     var session = req.get('X-Auth-Id')
 
     try {
@@ -98,7 +96,6 @@ exports.getUserSession = function(req, res, next) {
 
         next()
     })
-
 }
 
 
@@ -176,25 +173,51 @@ exports.sessionEnd = function(sessionKey, callback) {
 
 // Save mobile-id session
 exports.setMobileIdSession = function(session, callback) {
-    const sess = {
-        dt: new Date(),
-        id: session.id,
-        code: session.code,
-        idcode: session.idcode,
-        phone: session.phone,
-        user: session.user
+    async.waterfall([
+        function(callback) {
+            dbConnection('entu', callback)
+        },
+        function(connection, callback) {
+            connection.collection('midSessions').insertOne({
+                dt: new Date(),
+                id: session.id,
+                code: session.code,
+                idcode: session.idcode,
+                phone: session.phone,
+                user: session.user
+            }, callback)
+        },
+    ], function(err, session) {
+        if(err) { return next(err) }
+        if(!session || !session._id) { return next([403, 'No session']) }
+
+        callback(null, session)
+    })
+}
+
+
+
+// Get mobile-id session
+exports.getMobileIdSession = function(key, callback) {
+    try {
+        const session_id = new mongo.ObjectID(key)
+    } catch (e) {
+        return next(null)
     }
+
+    if(!session_id) { return next(null) }
 
     async.waterfall([
         function(callback) {
             dbConnection('entu', callback)
         },
         function(connection, callback) {
-            connection.collection('midSessions').insertOne(sess, callback)
+            connection.collection('midSessions').findOne({ _id: session_id }, callback)
         },
-    ], function(err) {
-        if(err) { return callback(err) }
+    ], function(err, session) {
+        if(err) { return next(err) }
+        if(!session || !session._id) { return next([403, 'No session']) }
 
-        callback(null, sess)
+        callback(null, session)
     })
 }

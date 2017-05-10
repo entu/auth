@@ -11,7 +11,6 @@ var entu   = require('../../helpers/entu')
 
 router.post('/', function(req, res, next) {
     const spChallenge = random.generate({ length: 20, charset: 'hex', capitalization: 'uppercase' })
-    var soapClient
 
     async.waterfall([
         function (callback) {
@@ -25,9 +24,7 @@ router.post('/', function(req, res, next) {
             soap.createClient('https://digidocservice.sk.ee/?wsdl', {}, callback)
         },
         function (client, callback) {
-            soapClient = client
-
-            soapClient.MobileAuthenticate({
+            client.MobileAuthenticate({
                 IDCode: req.body.idcode,
                 CountryCode: 'EE',
                 PhoneNo: req.body.phone,
@@ -66,29 +63,93 @@ router.post('/', function(req, res, next) {
             op.set(user, 'name', name)
             op.set(user, 'email', op.get(session, ['UserIDCode', '$value']) + '@eesti.ee')
 
-            const parameters = {
+            entu.setMobileIdSession({
                 id: op.get(session, ['Sesscode', '$value']),
                 code: op.get(session, ['ChallengeID', '$value']),
                 idcode: req.body.idcode,
                 phone: req.body.phone,
                 user: user
-            }
-
-            entu.setMobileIdSession(parameters, callback)
-
-            // soapClient.GetMobileAuthenticateStatus({
-            //     Sesscode: op.get(session, 'Sesscode.$value'),
-            //     WaitSignature: false,
-            // }, callback)
+            }, callback)
         }
     ], function (err, result) {
         if(err) { return next(err) }
 
         res.send({
-            result: result,
+            result: {
+                key: result._id,
+            },
             version: APP_VERSION,
             started: APP_STARTED
         })
+    })
+})
+
+
+
+router.get('/:key', function(req, res, next) {
+    var midSession
+
+    async.waterfall([
+        function (callback) {
+            if (req.params.key) {
+                callback(null)
+            } else {
+                callback([400, new Error('No key')])
+            }
+        },
+        function (callback) {
+            entu.getMobileIdSession(req.params.key, callback)
+        },
+        function (session, callback) {
+            midSession = session
+            soap.createClient('https://digidocservice.sk.ee/?wsdl', {}, callback)
+        },
+        function (client, callback) {
+            client.GetMobileAuthenticateStatus({
+                Sesscode: op.get(midSession, 'id'),
+                WaitSignature: false,
+            }, function(err, result) {
+                if(err) { return callback(err) }
+
+                callback(null, result)
+            })
+        },
+        function (session, callback) {
+            console.log(session)
+            // if (op.get(session, ['Status', '$value']) !== 'OK') {
+            //     return callback(new Error('MobileAuthenticate status not OK'))
+            // }
+            //
+            // if (!op.get(session, ['Sesscode', '$value'])) {
+            //     return callback(new Error('No MobileAuthenticate session'))
+            // }
+            //
+            // if (op.get(session, ['Challenge', '$value']).substr(0, 20) !== spChallenge) {
+            //     return callback(new Error('Challenge mismatch'))
+            // }
+
+            entu.sessionStart({ request: req, response: res, user: op.get(midSession, 'user', {}) }, callback)
+        }
+    ], function (err, session) {
+        if(err) { return next(err) }
+
+        var redirectUrl = req.cookies.redirect
+        if(redirectUrl) {
+            res.cookie('session', session.key, {
+                maxAge: 14 * 24 * 60 * 60 * 1000,
+                domain: APP_COOKIE_DOMAIN
+            })
+            res.clearCookie('redirect', {
+                domain: APP_COOKIE_DOMAIN
+            })
+            res.redirect(redirectUrl)
+        } else {
+            res.send({
+                result: session,
+                version: APP_VERSION,
+                started: APP_STARTED
+            })
+        }
     })
 })
 
