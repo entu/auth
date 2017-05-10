@@ -10,6 +10,8 @@ router.post('/', function(req, res, next) {
     const spChallenge = random.generate({ length: 20, charset: 'hex' })
     var soapClient
 
+    console.log(spChallenge)
+
     async.waterfall([
         function (callback) {
             if (req.body.idcode) {
@@ -35,22 +37,18 @@ router.post('/', function(req, res, next) {
                 SPChallenge: spChallenge,
             }
 
-            soapClient.MobileAuthenticate(parameters, function(err, result) {
-                if(err) { return callback(err) }
-
-                console.log(JSON.stringify(err, false, '  '))
-                console.log(JSON.stringify(result, false, '  '))
-
-                callback(null, result)
-            })
+            soapClient.MobileAuthenticate(parameters, callback)
         },
         function (session, callback) {
+            console.log(JSON.stringify(result, false, '  '))
+
             if (!op(session, 'Sesscode.$value')) {
                 return callback(new Error('No MobileAuthenticate session'))
             }
 
             if (op(session, 'Challenge.$value') !== spChallenge) {
-                return callback(new Error('Challenge mismatch'))
+                console.log(op(session, 'Challenge.$value'))
+                // return callback(new Error('Challenge mismatch'))
             }
 
             var parameters = {
@@ -58,16 +56,9 @@ router.post('/', function(req, res, next) {
                 WaitSignature: true,
             }
 
-            soapClient.GetMobileAuthenticateStatus(parameters, function(err, result) {
-                if(err) { return callback(err) }
-
-                console.log(JSON.stringify(err, false, '  '))
-                console.log(JSON.stringify(result, false, '  '))
-
-                callback(null, result)
-            })
+            soapClient.GetMobileAuthenticateStatus(parameters, callback)
         },
-    ], function (err, session) {
+    ], function (err, result) {
         if(err) { return next(err) }
 
         res.send({})
