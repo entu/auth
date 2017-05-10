@@ -115,18 +115,9 @@ router.get('/:key', function(req, res, next) {
             })
         },
         function (session, callback) {
-            console.log(session)
-            // if (op.get(session, ['Status', '$value']) !== 'OK') {
-            //     return callback(new Error('MobileAuthenticate status not OK'))
-            // }
-            //
-            // if (!op.get(session, ['Sesscode', '$value'])) {
-            //     return callback(new Error('No MobileAuthenticate session'))
-            // }
-            //
-            // if (op.get(session, ['Challenge', '$value']).substr(0, 20) !== spChallenge) {
-            //     return callback(new Error('Challenge mismatch'))
-            // }
+            if (op.get(session, ['Status', '$value']) !== 'USER_AUTHENTICATED') {
+                return callback([403, new Error(op.get(session, ['Status', '$value'], 'User not authenticated'))])
+            }
 
             entu.sessionStart({ request: req, response: res, user: op.get(midSession, 'user', {}) }, callback)
         },
