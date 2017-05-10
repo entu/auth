@@ -7,7 +7,7 @@ var soap   = require('soap')
 
 
 router.post('/', function(req, res, next) {
-    const spChallenge = random.generate(20)
+    const spChallenge = random.generate({ length: 20, charset: 'hex' })
 
     async.waterfall([
         function (callback) {
