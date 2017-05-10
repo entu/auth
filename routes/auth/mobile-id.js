@@ -119,6 +119,14 @@ router.get('/:key', function(req, res, next) {
             })
         },
         function (session, callback) {
+            if (op.get(session, ['Status', '$value']) === 'OUTSTANDING_TRANSACTION') {
+                return res.send({
+                    result: { in_progress: true },
+                    version: APP_VERSION,
+                    started: APP_STARTED
+                })
+            }
+
             if (op.get(session, ['Status', '$value']) !== 'USER_AUTHENTICATED') {
                 return callback([403, new Error(op.get(session, ['Status', '$value'], 'User not authenticated'))])
             }
