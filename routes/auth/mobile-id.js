@@ -38,7 +38,7 @@ router.post('/', function(req, res, next) {
                 SPChallenge: spChallenge,
             }, callback)
         },
-        function (session, callback) {
+        function (session, xxzz) {
             if (op.get(session, ['Status', '$value']) !== 'OK') {
                 return callback(new Error('MobileAuthenticate status not OK'))
             }
@@ -62,21 +62,23 @@ router.post('/', function(req, res, next) {
             op.set(user, 'name', name)
             op.set(user, 'email', op.get(session, ['UserIDCode', '$value']) + '@eesti.ee')
 
-            entu.setMobileIdSession({
+            const parameters = {
                 id: op.get(session, ['Sesscode', '$value']),
                 code: op.get(session, ['ChallengeID', '$value']),
                 idcode: req.body.idcode,
                 phone: req.body.phone,
                 user: user
-            }, function (err, session) {
-                callback(err, session)
+            }
+
+            entu.setMobileIdSession(parameters, function (err, session) {
+                xxzz(err, session)
             })
 
             // soapClient.GetMobileAuthenticateStatus({
             //     Sesscode: op.get(session, 'Sesscode.$value'),
             //     WaitSignature: false,
             // }, callback)
-        },
+        }
     ], function (err, result) {
         if(err) { return next(err) }
 
