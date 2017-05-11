@@ -244,8 +244,6 @@ exports.updateMobileIdSessionStatus = function(key, status, callback) {
     ], function(err, session) {
         if(err) { return callback(err) }
 
-        console.log(session)
-
         callback(null, status)
     })
 }
