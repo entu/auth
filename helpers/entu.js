@@ -116,6 +116,7 @@ exports.sessionStart = function(params, callback) {
     if(op.get(params, 'user.picture')) { op.set(session, 'user.picture', op.get(params, 'user.picture')) }
     if(op.get(params, 'request.ip')) { op.set(session, 'ip', op.get(params, 'request.ip')) }
     if(op.get(params, 'request.headers.user-agent')) { op.set(session, 'browser', op.get(params, 'request.headers.user-agent')) }
+    if(op.get(params, 'request.query.next')) { op.set(session, 'redirect', op.get(params, 'request.query.next')) }
     if(op.get(params, 'request.cookies.redirect')) { op.set(session, 'redirect', op.get(params, 'request.cookies.redirect')) }
 
     async.waterfall([
