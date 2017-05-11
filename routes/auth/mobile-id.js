@@ -10,20 +10,6 @@ var entu   = require('../../helpers/entu')
 
 
 router.post('/', function(req, res, next) {
-    res.clearCookie('redirect', {
-        domain: APP_COOKIE_DOMAIN
-    })
-    res.clearCookie('session', {
-        domain: APP_COOKIE_DOMAIN
-    })
-
-    if(req.query.next) {
-        res.cookie('redirect', req.body.next, {
-            maxAge: 60 * 60 * 1000,
-            domain: APP_COOKIE_DOMAIN
-        })
-    }
-
     const spChallenge = random.generate({ length: 20, charset: 'hex', capitalization: 'uppercase' })
     var challengeID
 
@@ -80,7 +66,7 @@ router.post('/', function(req, res, next) {
             op.set(user, 'name', name)
             op.set(user, 'email', op.get(session, ['UserIDCode', '$value']) + '@eesti.ee')
 
-            entu.setMobileIdSession({
+            entu.startMobileIdSession({
                 id: op.get(session, ['Sesscode', '$value']),
                 code: op.get(session, ['ChallengeID', '$value']),
                 idcode: req.body.idcode,
@@ -105,7 +91,7 @@ router.post('/', function(req, res, next) {
 
 
 
-router.get('/:key', function(req, res, next) {
+router.post('/:key', function(req, res, next) {
     var midSession
 
     async.waterfall([
@@ -134,16 +120,48 @@ router.get('/:key', function(req, res, next) {
             })
         },
         function (session, callback) {
-            if (op.get(session, ['Status', '$value']) === 'OUTSTANDING_TRANSACTION') {
-                return res.send({
-                    result: { in_progress: true },
-                    version: APP_VERSION,
-                    started: APP_STARTED
-                })
-            }
+            entu.updateMobileIdSessionStatus(req.params.key, op.get(session, ['Status', '$value']), callback)
+        },
+    ], function (err, status) {
+        if(err) { return next(err) }
 
-            if (op.get(session, ['Status', '$value']) !== 'USER_AUTHENTICATED') {
-                return callback([403, new Error(op.get(session, ['Status', '$value'], 'User not authenticated'))])
+        if (status === 'OUTSTANDING_TRANSACTION') {
+            res.send({
+                result: { in_progress: true },
+                version: APP_VERSION,
+                started: APP_STARTED
+            })
+        } else if (status === 'USER_AUTHENTICATED') {
+            res.send({
+                result: { authenticated: true },
+                version: APP_VERSION,
+                started: APP_STARTED
+            })
+        } else {
+            next([403, new Error(status || 'User not authenticated')])
+        }
+    })
+})
+
+
+
+router.get('/:key', function(req, res, next) {
+    var midSession
+
+    async.waterfall([
+        function (callback) {
+            if (req.params.key) {
+                callback(null)
+            } else {
+                callback([400, new Error('No key')])
+            }
+        },
+        function (callback) {
+            entu.getMobileIdSession(req.params.key, callback)
+        },
+        function (midSession, callback) {
+            if (op.get(midSession, 'status') !== 'USER_AUTHENTICATED') {
+                return callback([403, op.get(midSession, 'status', 'User not authenticated')])
             }
 
             entu.sessionStart({ request: req, response: res, user: op.get(midSession, 'user', {}) }, callback)
@@ -151,10 +169,8 @@ router.get('/:key', function(req, res, next) {
     ], function (err, session) {
         if(err) { return next(err) }
 
-        var redirectUrl = req.cookies.redirect
+        var redirectUrl = req.query.next
         if(redirectUrl) {
-            session.redirect = redirectUrl
-
             res.cookie('session', session.key, {
                 maxAge: 14 * 24 * 60 * 60 * 1000,
                 domain: APP_COOKIE_DOMAIN
@@ -162,13 +178,14 @@ router.get('/:key', function(req, res, next) {
             res.clearCookie('redirect', {
                 domain: APP_COOKIE_DOMAIN
             })
+            res.redirect(redirectUrl)
+        } else {
+            res.send({
+                result: session,
+                version: APP_VERSION,
+                started: APP_STARTED
+            })
         }
-
-        res.send({
-            result: session,
-            version: APP_VERSION,
-            started: APP_STARTED
-        })
     })
 })
 

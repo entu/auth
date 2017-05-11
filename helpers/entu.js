@@ -172,7 +172,7 @@ exports.sessionEnd = function(sessionKey, callback) {
 
 
 // Save mobile-id session
-exports.setMobileIdSession = function(session, callback) {
+exports.startMobileIdSession = function(session, callback) {
     async.waterfall([
         function(callback) {
             dbConnection('entu', callback)
@@ -219,5 +219,33 @@ exports.getMobileIdSession = function(key, callback) {
         if(!session || !session._id) { return callback([403, 'No session']) }
 
         callback(null, session)
+    })
+}
+
+
+
+// Update mobile-id session
+exports.updateMobileIdSessionStatus = function(key, status, callback) {
+    try {
+        var session_id = new mongo.ObjectID(key)
+    } catch (e) {
+        return callback(null)
+    }
+
+    if(!session_id) { return callback(null) }
+
+    async.waterfall([
+        function(callback) {
+            dbConnection('entu', callback)
+        },
+        function(connection, callback) {
+            connection.collection('midSessions').updateOne({ _id: session_id }, { $set: { status : status } }, callback)
+        },
+    ], function(err, session) {
+        if(err) { return callback(err) }
+
+        console.log(session)
+
+        callback(null, status)
     })
 }
