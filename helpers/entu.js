@@ -1,5 +1,6 @@
 var _       = require('underscore')
 var async   = require('async')
+var fs      = require('fs')
 var mongo   = require('mongodb')
 var op      = require('object-path')
 var random  = require('randomstring')
@@ -20,7 +21,9 @@ var dbConnection = function(db, callback) {
     ], function(err) {
         if(!err) { return callback(null, APP_ENTU_DBS[db]) }
 
-        mongo.MongoClient.connect(APP_MONGODB + db, { ssl: true, sslValidate: false, autoReconnect: true }, function(err, connection) {
+        var ca = [fs.readFileSync(APP_MONGODB_CA_FILE)]
+
+        mongo.MongoClient.connect(APP_MONGODB + db, { ssl: true, sslValidate: true, sslCA: ca, autoReconnect: true }, function(err, connection) {
             if(err) { return callback(err) }
 
             APP_ENTU_DBS[db] = connection

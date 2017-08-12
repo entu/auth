@@ -16,6 +16,7 @@ APP_STARTED        = new Date().toISOString()
 APP_PORT           = process.env.PORT || 3000
 APP_COOKIE_DOMAIN  = process.env.COOKIE_DOMAIN || ''
 APP_MONGODB        = process.env.MONGODB || 'mongodb://entu_mongodb:27017/'
+APP_MONGODB_CA_FILE = process.env.MONGODB_CA_FILE
 
 MOBILE_ID = process.env.MOBILE_ID
 
