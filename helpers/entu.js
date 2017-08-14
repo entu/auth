@@ -21,9 +21,7 @@ var dbConnection = function(db, callback) {
     ], function(err) {
         if(!err) { return callback(null, APP_ENTU_DBS[db]) }
 
-        var ca = [fs.readFileSync(APP_MONGODB_CA_FILE)]
-
-        mongo.MongoClient.connect(APP_MONGODB + db, { ssl: true, sslValidate: true, sslCA: ca, autoReconnect: true }, function(err, connection) {
+        mongo.MongoClient.connect(APP_MONGODB + db, { ssl: true, sslValidate: true, autoReconnect: true }, function(err, connection) {
             if(err) { return callback(err) }
 
             APP_ENTU_DBS[db] = connection
