@@ -26,9 +26,10 @@ var dbConnection = function(db, callback) {
 
             console.log('Connected to ' + db)
 
-            connection.on('close', () => {
-                delete APP_ENTU_DBS[customer]
+            connection.on('close', function (err) {
+                delete APP_ENTU_DBS[db]
                 console.log('Disconnected from ' + db)
+                console.log(err.toString())
             })
 
             APP_ENTU_DBS[db] = connection
