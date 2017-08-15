@@ -21,8 +21,15 @@ var dbConnection = function(db, callback) {
     ], function(err) {
         if(!err) { return callback(null, APP_ENTU_DBS[db]) }
 
-        mongo.MongoClient.connect(APP_MONGODB, { ssl: true, sslValidate: true, autoReconnect: true }, function(err, connection) {
+        mongo.MongoClient.connect(APP_MONGODB, { ssl: true, sslValidate: true }, function(err, connection) {
             if(err) { return callback(err) }
+
+            console.log('Connected to ' + db)
+
+            connection.on('close', () => {
+                delete APP_ENTU_DBS[customer]
+                console.log('Disconnected from ' + db)
+            })
 
             APP_ENTU_DBS[db] = connection
             callback(null, APP_ENTU_DBS[db])
