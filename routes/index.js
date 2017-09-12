@@ -18,6 +18,12 @@ router.get('/headers', function(req, res) {
 
 
 
+router.get('/ips', function(req, res) {
+    res.send(req.ips)
+})
+
+
+
 router.get('/test', function() {
     throw new Error('böö')
 })
