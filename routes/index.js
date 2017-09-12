@@ -12,6 +12,12 @@ router.get('/', function(req, res) {
 
 
 
+router.get('/headers', function(req, res) {
+    res.send(req.headers)
+})
+
+
+
 router.get('/test', function() {
     throw new Error('böö')
 })
