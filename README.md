@@ -1,1 +1,1 @@
-# Authentication service for Entu.ee
+Authentication service for Entu.ee
