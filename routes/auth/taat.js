@@ -55,10 +55,10 @@ router.post('/', passport.authenticate('saml', { failureRedirect: '/login', sess
     op.del(req, ['user', '_raw'])
 
     var user = {}
-    op.set(user, 'provider', 'taat.' + op.get(req, ['user', 'schacHomeOrganization']))
-    op.set(user, 'id', op.get(req, ['user', 'urn:mace:dir:attribute-def:eduPersonTargetedID']))
-    op.set(user, 'name', op.get(req, ['user', 'urn:mace:dir:attribute-def:cn']))
-    op.set(user, 'email', op.get(req, ['user', 'urn:mace:dir:attribute-def:mail']))
+    op.set(user, 'provider', 'taat')
+    op.set(user, 'id', op.get(req, ['user', 'eduPersonTargetedID']))
+    op.set(user, 'name', op.get(req, ['user', 'cn']))
+    op.set(user, 'email', op.get(req, ['user', 'mail']))
 
     entu.sessionStart({
         request: req,
