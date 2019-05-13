@@ -25,7 +25,6 @@
         "cookie-parser": "1.x",
         "express": "4.x",
         "mongodb": "2.x",
-        "newrelic": "2.x",
         "object-path": "0.x",
         "passport-facebook": "2.x",
         "passport-google-oauth": "1.x",
