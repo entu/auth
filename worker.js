@@ -23,12 +23,6 @@ GOOGLE_SECRET = process.env.GOOGLE_SECRET
 FACEBOOK_ID = process.env.FACEBOOK_ID
 FACEBOOK_SECRET = process.env.FACEBOOK_SECRET
 
-TWITTER_KEY = process.env.TWITTER_KEY
-TWITTER_SECRET = process.env.TWITTER_SECRET
-
-LIVE_ID = process.env.LIVE_ID
-LIVE_SECRET = process.env.LIVE_SECRET
-
 TAAT_ENTRYPOINT = process.env.TAAT_ENTRYPOINT
 TAAT_ISSUER = process.env.TAAT_ISSUER
 TAAT_CERT = process.env.TAAT_CERT
@@ -109,8 +103,6 @@ app.use('/auth/id-card', require('./routes/auth/id-card'))
 if(MOBILE_ID) { app.use('/auth/mobile-id', require('./routes/auth/mobile-id')) }
 if(GOOGLE_ID && GOOGLE_SECRET) { app.use('/auth/google', require('./routes/auth/google')) }
 if(FACEBOOK_ID && FACEBOOK_SECRET) { app.use('/auth/facebook', require('./routes/auth/facebook')) }
-if(TWITTER_KEY && TWITTER_SECRET) { app.use('/auth/twitter', require('./routes/auth/twitter')) }
-if(LIVE_ID && LIVE_SECRET) { app.use('/auth/live', require('./routes/auth/live')) }
 if(TAAT_ENTRYPOINT && TAAT_CERT && TAAT_PRIVATECERT) { app.use('/auth/taat', require('./routes/auth/taat')) }
 
 // logs to getsentry.com - error

@@ -16,10 +16,6 @@ services:
             GOOGLE_SECRET:
             FACEBOOK_ID:
             FACEBOOK_SECRET:
-            TWITTER_KEY:
-            TWITTER_SECRET:
-            LIVE_ID:
-            LIVE_SECRET:
 
     nginx:
         image: 'nginx:1.14'
