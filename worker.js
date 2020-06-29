@@ -2,7 +2,6 @@ var bparser  = require('body-parser')
 var cparser  = require('cookie-parser')
 var express  = require('express')
 var passport = require('passport')
-var raven    = require('raven')
 
 var entu     = require('./helpers/entu')
 
@@ -43,19 +42,6 @@ passport.deserializeUser(function(user, done) {
 
 
 
-// initialize getsentry.com client
-if(process.env.SENTRY_DSN) {
-    raven.config(process.env.SENTRY_DSN, {
-        release: APP_VERSION,
-        dataCallback: function(data) {
-            delete data.request.env
-            return data
-        }
-    }).install()
-}
-
-
-
 // start express app
 var app = express()
 
@@ -64,11 +50,6 @@ app.disable('x-powered-by')
 
 // get correct client IP behind nginx
 app.set('trust proxy', true)
-
-// logs to getsentry.com - start
-if(process.env.SENTRY_DSN) {
-    app.use(raven.requestHandler())
-}
 
 // Initialize Passport
 app.use(passport.initialize())
@@ -104,11 +85,6 @@ if(MOBILE_ID) { app.use('/auth/mobile-id', require('./routes/auth/mobile-id')) }
 if(GOOGLE_ID && GOOGLE_SECRET) { app.use('/auth/google', require('./routes/auth/google')) }
 if(FACEBOOK_ID && FACEBOOK_SECRET) { app.use('/auth/facebook', require('./routes/auth/facebook')) }
 if(TAAT_ENTRYPOINT && TAAT_CERT && TAAT_PRIVATECERT) { app.use('/auth/taat', require('./routes/auth/taat')) }
-
-// logs to getsentry.com - error
-if(process.env.SENTRY_DSN) {
-    app.use(raven.errorHandler())
-}
 
 // show 404
 app.use(function(req, res, next) {

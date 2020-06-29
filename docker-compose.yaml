@@ -16,6 +16,10 @@ services:
             GOOGLE_SECRET:
             FACEBOOK_ID:
             FACEBOOK_SECRET:
+            TAAT_ENTRYPOINT:
+            TAAT_ISSUER:
+            TAAT_CERT:
+            TAAT_PRIVATECERT:
 
     nginx:
         image: 'nginx:1.14'
