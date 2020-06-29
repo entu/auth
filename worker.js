@@ -19,9 +19,6 @@ MOBILE_ID = process.env.MOBILE_ID
 GOOGLE_ID = process.env.GOOGLE_ID
 GOOGLE_SECRET = process.env.GOOGLE_SECRET
 
-FACEBOOK_ID = process.env.FACEBOOK_ID
-FACEBOOK_SECRET = process.env.FACEBOOK_SECRET
-
 TAAT_ENTRYPOINT = process.env.TAAT_ENTRYPOINT
 TAAT_ISSUER = process.env.TAAT_ISSUER
 TAAT_CERT = process.env.TAAT_CERT
@@ -83,7 +80,6 @@ app.use('/auth/id-card', require('./routes/auth/id-card'))
 
 if(MOBILE_ID) { app.use('/auth/mobile-id', require('./routes/auth/mobile-id')) }
 if(GOOGLE_ID && GOOGLE_SECRET) { app.use('/auth/google', require('./routes/auth/google')) }
-if(FACEBOOK_ID && FACEBOOK_SECRET) { app.use('/auth/facebook', require('./routes/auth/facebook')) }
 if(TAAT_ENTRYPOINT && TAAT_CERT && TAAT_PRIVATECERT) { app.use('/auth/taat', require('./routes/auth/taat')) }
 
 // show 404

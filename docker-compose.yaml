@@ -14,8 +14,6 @@ services:
             MOBILE_ID:
             GOOGLE_ID:
             GOOGLE_SECRET:
-            FACEBOOK_ID:
-            FACEBOOK_SECRET:
             TAAT_ENTRYPOINT:
             TAAT_ISSUER:
             TAAT_CERT:
