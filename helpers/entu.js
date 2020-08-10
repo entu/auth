@@ -21,7 +21,7 @@ var dbConnection = function(db, callback) {
     ], function(err) {
         if(!err) { return callback(null, APP_ENTU_DBS[db]) }
 
-        mongo.MongoClient.connect(APP_MONGODB, { ssl: true, sslValidate: true, useNewUrlParser: true, useUnifiedTopology: true }, function(err, connection) {
+        mongo.MongoClient.connect(APP_MONGODB, { useNewUrlParser: true, useUnifiedTopology: true }, function(err, connection) {
             if(err) { return callback(err) }
 
             console.log('Connected to ' + db)
