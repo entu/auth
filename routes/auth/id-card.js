@@ -2,7 +2,6 @@ var _      = require('underscore')
 var async  = require('async')
 var op     = require('object-path')
 var router = require('express').Router()
-var soap   = require('soap')
 
 var entu   = require('../../helpers/entu')
 
@@ -49,36 +48,28 @@ router.get('/error', function(req, res) {
 router.get('/callback', function(req, res, next) {
     async.waterfall([
         function (callback) {
-            if (req.headers.ssl_client_verify === 'SUCCESS' && req.headers.ssl_client_cert) {
-                callback(null)
+            if (req.headers.ssl_client_verify === 'SUCCESS' && req.headers.ssl_client_s_dn) {
+                callback(null, req.headers.ssl_client_s_dn)
             } else {
                 callback(new Error('ID-Card reading error'))
             }
         },
-        function (callback) {
-            soap.createClient('https://digidocservice.sk.ee/?wsdl', {}, callback)
-        },
-        function (client, callback) {
-            client.CheckCertificate({ Certificate: req.headers.ssl_client_cert }, function(err, result) {
-                if(err) { return callback(err) }
-
-                callback(null, result)
-            })
-        },
         function (result, callback) {
-            if(op.get(result, ['Status', '$value']) !== 'GOOD') { return callback(new Error('Not valid ID-Card')) }
-            if(!op.get(result, ['UserIDCode', '$value'])) { return callback(new Error('Not ID code')) }
+            const regexp = [...result.matchAll(/([^=]*)=([^/]*)/g)]
+            const profile = Object.fromEntries(regexp.map(function(r) {
+                return [v[1].replace('/', ''), v[2]]
+            }))
 
             var user = {}
             var name = _.compact([
-                op.get(result, ['UserGivenname', '$value']),
-                op.get(result, ['UserSurname', '$value'])
+                profile.GN,
+                profile.SN
             ]).join(' ')
 
             op.set(user, 'provider', 'id-card')
-            op.set(user, 'id', op.get(result, ['UserIDCode', '$value']))
+            op.set(user, 'id', profile.serialNumber)
             op.set(user, 'name', name)
-            op.set(user, 'email', op.get(result, ['UserIDCode', '$value']) + '@eesti.ee')
+            op.set(user, 'email', profile.serialNumber + '@eesti.ee')
 
             entu.sessionStart({ request: req, response: res, user: user }, callback)
         }
