@@ -1,17 +1,32 @@
 var _      = require('underscore')
+var crypto = require('crypto')
 var async  = require('async')
+var axios  = require('axios')
 var op     = require('object-path')
-var random = require('randomstring')
 var router = require('express').Router()
-var soap   = require('soap')
 
 var entu   = require('../../helpers/entu')
 
 
 
+function zeroPad (num, places) {
+    return String(num).padStart(places, '0')
+}
+
+
+
 router.post('/', function(req, res, next) {
-    const spChallenge = random.generate({ length: 20, charset: 'hex', capitalization: 'uppercase' })
-    var challengeID
+    var hash = crypto.randomBytes(32).toString('hex')
+    var hashBuffer = Buffer.from(hash, 'hex')
+    var binArray = []
+
+    for (const v of hashBuffer.values()) {
+        binArray.push(zeroPad(v.toString(2), 8))
+    }
+
+    var bin = binArray.join('')
+    var newBinary = bin.substr(0, 6) + bin.substr(-7)
+    var pin = zeroPad(parseInt(newBinary, 2), 4)
 
     async.waterfall([
         function (callback) {
@@ -22,57 +37,36 @@ router.post('/', function(req, res, next) {
             }
         },
         function (callback) {
-            soap.createClient('https://digidocservice.sk.ee/?wsdl', {}, callback)
-        },
-        function (client, callback) {
-            client.MobileAuthenticate({
-                IDCode: req.body.idcode,
-                CountryCode: 'EE',
-                PhoneNo: req.body.phone,
-                ServiceName: MOBILE_ID,
-                MessagingMode: 'asynchClientServer',
-                Language: 'EST',
-                // MessageToDisplay: '',
-                SPChallenge: spChallenge,
-            }, function(err, result) {
-                if(err) { return callback(err) }
-
-                callback(null, result)
+            axios.post('https://tsp.demo.sk.ee/mid-api/authentication', {
+                relyingPartyName: MID_NAME,
+                relyingPartyUUID: MID_UUID,
+                phoneNumber: req.body.phone,
+                nationalIdentityNumber: req.body.idcode,
+                hash: hashBuffer.toString('base64'),
+                hashType: 'SHA256',
+                language: 'EST'
+            })
+            .then((response) => {
+                callback(null, response.json())
+            })
+            .catch((error) => {
+                callback(error)
             })
         },
         function (session, callback) {
-            if (op.get(session, ['Status', '$value']) !== 'OK') {
-                return callback(new Error('MobileAuthenticate status not OK'))
+            if (!session.sessionID) {
+                return callback(new Error('No MID authentication sessionID'))
             }
-
-            if (!op.get(session, ['Sesscode', '$value'])) {
-                return callback(new Error('No MobileAuthenticate session'))
-            }
-
-            if (op.get(session, ['Challenge', '$value']).substr(0, 20) !== spChallenge) {
-                return callback(new Error('Challenge mismatch'))
-            }
-
-            challengeID = op.get(session, ['ChallengeID', '$value'])
-
-            var user = {}
-            var name = _.compact([
-                op.get(session, ['UserGivenname', '$value']),
-                op.get(session, ['UserSurname', '$value'])
-            ]).join(' ')
-
-            op.set(user, 'provider', 'mobile-id')
-            op.set(user, 'id', op.get(session, ['UserIDCode', '$value']))
-            op.set(user, 'name', name)
-            op.set(user, 'email', op.get(session, ['UserIDCode', '$value']) + '@eesti.ee')
 
             entu.startMobileIdSession({
-                id: op.get(session, ['Sesscode', '$value']),
-                code: op.get(session, ['ChallengeID', '$value']),
-                idcode: req.body.idcode,
-                phone: req.body.phone,
-                redirect: req.body.next,
-                user: user
+                sessionID: session.sessionID,
+                hash: hash,
+                user: {
+                    provider: 'mobile-id',
+                    id: req.body.idcode,
+                    name: req.body.idcode,
+                    email: req.body.idcode + '@eesti.ee'
+                }
             }, callback)
         },
     ], function (err, result) {
@@ -81,7 +75,7 @@ router.post('/', function(req, res, next) {
         res.send({
             result: {
                 key: result,
-                code: challengeID
+                code: pin
             },
             version: APP_VERSION,
             started: APP_STARTED
@@ -92,8 +86,6 @@ router.post('/', function(req, res, next) {
 
 
 router.post('/:key', function(req, res, next) {
-    var midSession
-
     async.waterfall([
         function (callback) {
             if (req.params.key) {
@@ -106,32 +98,31 @@ router.post('/:key', function(req, res, next) {
             entu.getMobileIdSession(req.params.key, callback)
         },
         function (session, callback) {
-            midSession = session
-            soap.createClient('https://digidocservice.sk.ee/?wsdl', {}, callback)
-        },
-        function (client, callback) {
-            client.GetMobileAuthenticateStatus({
-                Sesscode: op.get(midSession, 'id'),
-                WaitSignature: false,
-            }, function(err, result) {
-                if(err) { return callback(err) }
-
-                callback(null, result)
+            axios.get('https://tsp.demo.sk.ee/mid-api/authentication/session/' + session.sessionID)
+            .then((response) => {
+                callback(null, response.json())
+            })
+            .catch((error) => {
+                callback(error)
             })
         },
         function (session, callback) {
-            entu.updateMobileIdSessionStatus(req.params.key, op.get(session, ['Status', '$value']), callback)
+            if (session.state === 'COMPLETE') {
+                entu.updateMobileIdSessionStatus(req.params.key, session.result, callback)
+            } else {
+                callback(null)
+            }
         },
     ], function (err, status) {
         if(err) { return next(err) }
 
-        if (status === 'OUTSTANDING_TRANSACTION') {
+        if (!status) {
             res.send({
                 result: { in_progress: true },
                 version: APP_VERSION,
                 started: APP_STARTED
             })
-        } else if (status === 'USER_AUTHENTICATED') {
+        } else if (status === 'OK') {
             res.send({
                 result: { authenticated: true },
                 version: APP_VERSION,
@@ -146,8 +137,6 @@ router.post('/:key', function(req, res, next) {
 
 
 router.get('/:key', function(req, res, next) {
-    var midSession
-
     async.waterfall([
         function (callback) {
             if (req.params.key) {
@@ -160,7 +149,7 @@ router.get('/:key', function(req, res, next) {
             entu.getMobileIdSession(req.params.key, callback)
         },
         function (midSession, callback) {
-            if (op.get(midSession, 'status') !== 'USER_AUTHENTICATED') {
+            if (op.get(midSession, 'status') !== 'OK') {
                 return callback([403, op.get(midSession, 'status', 'User not authenticated')])
             }
 

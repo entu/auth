@@ -11,7 +11,8 @@ services:
             PORT: 80
             COOKIE_DOMAIN: .entu.ee
             MONGODB:
-            MOBILE_ID:
+            MID_NAME:
+            MID_UUID:
             GOOGLE_ID:
             GOOGLE_SECRET:
             TAAT_ENTRYPOINT:

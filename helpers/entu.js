@@ -1,10 +1,8 @@
-var _       = require('underscore')
-var async   = require('async')
-var fs      = require('fs')
-var mongo   = require('mongodb')
-var op      = require('object-path')
-var random  = require('randomstring')
-var request = require('request')
+var _      = require('underscore')
+var async  = require('async')
+var crypto = require('crypto')
+var mongo  = require('mongodb')
+var op     = require('object-path')
 
 
 
@@ -115,7 +113,7 @@ exports.sessionStart = function(params, callback) {
 
     var session = {
         created: new Date(),
-        key: random.generate(64),
+        key: crypto.randomBytes(64).toString('hex'),
     }
 
     if(op.get(params, 'user.id')) { op.set(session, 'user.id', op.get(params, 'user.id')) }
@@ -167,7 +165,7 @@ exports.sessionEnd = function(sessionKey, callback) {
 
 
 
-// Save mobile-id session
+// Start mobile-id session
 exports.startMobileIdSession = function(session, callback) {
     async.waterfall([
         function(callback) {
@@ -176,11 +174,9 @@ exports.startMobileIdSession = function(session, callback) {
         function(connection, callback) {
             connection.collection('midSessions').insertOne({
                 dt: new Date(),
-                id: session.id,
-                code: session.code,
-                idcode: session.idcode,
-                phone: session.phone,
-                user: session.user
+                sessionID: session.sessionID,
+                hash: session.hash,
+                user: user
             }, callback)
         },
     ], function(err, r) {
