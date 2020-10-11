@@ -176,7 +176,7 @@ exports.startMobileIdSession = function(session, callback) {
                 dt: new Date(),
                 sessionID: session.sessionID,
                 hash: session.hash,
-                user: user
+                user: session.user
             }, callback)
         },
     ], function(err, r) {
