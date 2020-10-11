@@ -47,7 +47,7 @@ router.post('/', function(req, res, next) {
                 language: 'EST'
             })
             .then((response) => {
-                callback(null, response)
+                callback(null, response.data)
             })
             .catch((error) => {
                 callback(error)
@@ -100,7 +100,7 @@ router.post('/:key', function(req, res, next) {
         function (session, callback) {
             axios.get('https://tsp.demo.sk.ee/mid-api/authentication/session/' + session.sessionID)
             .then((response) => {
-                callback(null, response)
+                callback(null, response.data)
             })
             .catch((error) => {
                 callback(error)
