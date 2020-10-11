@@ -1,7 +1,7 @@
 var _      = require('underscore')
-var crypto = require('crypto')
 var async  = require('async')
 var axios  = require('axios')
+var crypto = require('crypto')
 var op     = require('object-path')
 var router = require('express').Router()
 
@@ -37,7 +37,7 @@ router.post('/', function(req, res, next) {
             }
         },
         function (callback) {
-            axios.post('https://tsp.demo.sk.ee/mid-api/authentication', {
+            axios.post('https://mid.sk.ee/mid-api/authentication', {
                 relyingPartyName: MID_NAME,
                 relyingPartyUUID: MID_UUID,
                 phoneNumber: req.body.phone,
@@ -98,7 +98,7 @@ router.post('/:key', function(req, res, next) {
             entu.getMobileIdSession(req.params.key, callback)
         },
         function (session, callback) {
-            axios.get('https://tsp.demo.sk.ee/mid-api/authentication/session/' + session.sessionID)
+            axios.get('https://mid.sk.ee/mid-api/authentication/session/' + session.sessionID)
             .then((response) => {
                 callback(null, response.data)
             })
