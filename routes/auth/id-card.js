@@ -61,6 +61,8 @@ router.get('/callback', function(req, res, next) {
                     return [v[0], v[1]]
                 }
             }).filter(function(x) { return x }))
+            console.log(result);
+            console.log(profile);
 
             var user = {}
             var name = _.compact([
