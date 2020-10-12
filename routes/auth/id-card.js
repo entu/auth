@@ -55,14 +55,12 @@ router.get('/callback', function(req, res, next) {
             }
         },
         function (result, callback) {
-            console.log(result);
             const profile = Object.fromEntries(result.split(',').map(function(value) {
                 var v = value.split('=')
                 if (v[1]) {
                     return [v[0], v[1]]
                 }
             }).filter(function(x) { return x }))
-            console.log(profile);
 
             var user = {}
             var name = _.compact([
