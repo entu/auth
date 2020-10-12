@@ -48,6 +48,7 @@ router.get('/error', function(req, res) {
 router.get('/callback', function(req, res, next) {
     async.waterfall([
         function (callback) {
+            console.log(req.headers);
             if (req.headers.ssl_client_verify === 'SUCCESS' && req.headers.ssl_client_s_dn) {
                 callback(null, req.headers.ssl_client_s_dn)
             } else {
