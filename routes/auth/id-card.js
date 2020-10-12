@@ -48,7 +48,6 @@ router.get('/error', function(req, res) {
 router.get('/callback', function(req, res, next) {
     async.waterfall([
         function (callback) {
-            console.log(req.headers);
             if (req.headers.ssl_client_verify === 'SUCCESS' && req.headers.ssl_client_s_dn) {
                 callback(null, req.headers.ssl_client_s_dn)
             } else {
@@ -56,10 +55,14 @@ router.get('/callback', function(req, res, next) {
             }
         },
         function (result, callback) {
-            const regexp = [...result.matchAll(/([^=]*)=([^/]*)/g)]
-            const profile = Object.fromEntries(regexp.map(function(r) {
-                return [v[1].replace('/', ''), v[2]]
-            }))
+            console.log(result);
+            const profile = Object.fromEntries(result.split(',').map(function(value) {
+                val v = value.split('=')
+                if (v[1]) {
+                    return [v[0], v[1]]
+                }
+            }).filter(function(x) { return x }))
+            console.log(profile);
 
             var user = {}
             var name = _.compact([
