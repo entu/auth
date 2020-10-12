@@ -69,11 +69,12 @@ router.get('/callback', function(req, res, next) {
                 profile.GN,
                 profile.SN
             ]).join(' ')
+            var idcode = profile.serialNumber.replace('PNOEE-', '')
 
             op.set(user, 'provider', 'id-card')
-            op.set(user, 'id', profile.serialNumber)
+            op.set(user, 'id', idcode)
             op.set(user, 'name', name)
-            op.set(user, 'email', profile.serialNumber + '@eesti.ee')
+            op.set(user, 'email', idcode + '@eesti.ee')
 
             entu.sessionStart({ request: req, response: res, user: user }, callback)
         }
