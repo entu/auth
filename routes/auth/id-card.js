@@ -57,7 +57,7 @@ router.get('/callback', function(req, res, next) {
         function (result, callback) {
             console.log(result);
             const profile = Object.fromEntries(result.split(',').map(function(value) {
-                val v = value.split('=')
+                var v = value.split('=')
                 if (v[1]) {
                     return [v[0], v[1]]
                 }
