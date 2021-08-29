@@ -100,8 +100,6 @@ router.post('/:key', function(req, res, next) {
             entu.getMobileIdSession(req.params.key, callback)
         },
         function (session, callback) {
-            console.log(session);
-
             axios.get('https://mid.sk.ee/mid-api/authentication/session/' + session.sessionID)
             .then((response) => {
                 callback(null, response.data)
