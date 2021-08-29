@@ -13,7 +13,7 @@
         "url": "https://github.com/argoroots/entu-auth/issues"
     },
     "scripts": {
-        "start": "node ./master.js"
+        "start": "node ./src/master.js"
     },
     "dependencies": {
         "async": "3.2.1",

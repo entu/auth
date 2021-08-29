@@ -8,7 +8,7 @@ var entu     = require('./helpers/entu')
 
 
 // global variables (and list of all used environment variables)
-APP_VERSION        = process.env.VERSION || require('./package').version
+APP_VERSION        = process.env.VERSION || require('../package').version
 APP_STARTED        = new Date().toISOString()
 APP_PORT           = process.env.PORT || 3000
 APP_COOKIE_DOMAIN  = process.env.COOKIE_DOMAIN || ''
