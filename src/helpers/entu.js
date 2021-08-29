@@ -93,7 +93,7 @@ exports.getUserSession = function(req, res, next) {
             dbConnection('entu', callback)
         },
         function(connection, callback) {
-            connection.collection('session').findOne({ _id: session_id, key: session_key }, callback)
+            connection.collection('session').findOne({ _id: session_id, key: session_key }, {}, callback)
         },
     ], function(err, session) {
         if(err) { return next(err) }
@@ -204,7 +204,7 @@ exports.getMobileIdSession = function(key, callback) {
             dbConnection('entu', callback)
         },
         function(connection, callback) {
-            connection.collection('midSessions').findOne({ _id: session_id }, callback)
+            connection.collection('midSessions').findOne({ _id: session_id }, {}, callback)
         },
     ], function(err, session) {
         if(err) { return callback(err) }
