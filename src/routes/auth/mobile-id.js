@@ -50,6 +50,8 @@ router.post('/', function(req, res, next) {
                 callback(null, response.data)
             })
             .catch((error) => {
+                console.error('SK ERROR:', error.response.data)
+
                 callback(error)
             })
         },
@@ -103,6 +105,8 @@ router.post('/:key', function(req, res, next) {
                 callback(null, response.data)
             })
             .catch((error) => {
+                console.error('SK ERROR:', error.response.data)
+
                 callback(error)
             })
         },
