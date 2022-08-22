@@ -90,6 +90,8 @@ app.use(function(req, res, next) {
 
 // show error
 app.use(function(err, req, res, next) {
+    console.error(err)
+
     var code = 500
     var error = err
     if (err.constructor === Array) {
